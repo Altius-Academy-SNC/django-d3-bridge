@@ -13,3 +13,4 @@ htmlcov/
 *.mbtiles
 *.sqlite3
 .DS_Store
+site/

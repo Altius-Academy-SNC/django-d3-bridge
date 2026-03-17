@@ -1,0 +1,111 @@
+site_name: django-d3-bridge
+site_url: https://altius-academy-snc.github.io/django-d3-bridge
+site_description: Declarative D3.js visualizations for Django
+site_author: Paul Guindo
+repo_url: https://github.com/Altius-Academy-SNC/django-d3-bridge
+repo_name: Altius-Academy-SNC/django-d3-bridge
+
+theme:
+  name: material
+  palette:
+    - scheme: default
+      primary: deep orange
+      accent: amber
+      toggle:
+        icon: material/brightness-7
+        name: Dark mode
+    - scheme: slate
+      primary: deep orange
+      accent: amber
+      toggle:
+        icon: material/brightness-4
+        name: Light mode
+  features:
+    - content.code.copy
+    - content.code.annotate
+    - content.tabs.link
+    - navigation.sections
+    - navigation.expand
+    - navigation.tabs
+    - navigation.top
+    - search.highlight
+    - search.suggest
+  icon:
+    repo: fontawesome/brands/github
+
+nav:
+  - Home: index.md
+  - Getting Started:
+      - Installation: getting-started/install.md
+      - Quick Start: getting-started/quickstart.md
+  - Charts:
+      - Overview: charts/index.md
+      - Basic:
+          - Bar Chart: charts/bar.md
+          - Line Chart: charts/line.md
+          - Area Chart: charts/area.md
+          - Pie & Donut: charts/pie.md
+          - Scatter Plot: charts/scatter.md
+      - Geographic:
+          - Choropleth Map: charts/choropleth.md
+          - Bubble Map: charts/bubblemap.md
+      - Network:
+          - Force Graph: charts/force.md
+          - Sankey Diagram: charts/sankey.md
+          - Chord Diagram: charts/chord.md
+      - Hierarchy:
+          - Tree Diagram: charts/tree.md
+          - Treemap: charts/treemap.md
+          - Circle Packing: charts/pack.md
+          - Sunburst: charts/sunburst.md
+          - Dendrogram: charts/dendrogram.md
+      - Statistical:
+          - Contour Plot: charts/contour.md
+          - Density Plot: charts/density.md
+          - Voronoi Diagram: charts/voronoi.md
+  - Guides:
+      - Django Integration: guides/django.md
+      - Themes & Palettes: guides/themes.md
+      - Polling (Auto-refresh): guides/polling.md
+      - MQTT Live Updates: guides/mqtt.md
+      - GeoDjango & GeoJSON: guides/geodjango.md
+      - Custom D3.js: guides/custom-d3.md
+  - Concepts:
+      - Architecture: concepts/architecture.md
+      - Data Modes: concepts/data-modes.md
+  - API Reference:
+      - Core: api/core.md
+      - Charts: api/charts.md
+      - Serializers: api/serializers.md
+      - Template Tags: api/templatetags.md
+      - Views: api/views.md
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - toc:
+      permalink: true
+  - attr_list
+  - def_list
+  - tables
+  - footnotes
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            docstring_style: google
+            show_source: false
+            show_root_heading: true
+            members_order: source
+          paths: [src]
