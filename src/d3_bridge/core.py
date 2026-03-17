@@ -7,7 +7,7 @@ from typing import Any
 from uuid import uuid4
 
 from d3_bridge.data.serializers import serialize_data
-from d3_bridge.themes import THEMES, resolve_theme
+from d3_bridge.themes import resolve_theme
 
 
 class Chart:
