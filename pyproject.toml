@@ -1,0 +1,60 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "django-d3-bridge"
+version = "0.1.0"
+description = "Declarative D3.js visualizations for Django — charts, maps, networks, with MQTT live updates"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.10"
+authors = [
+    { name = "Paul Guindo", email = "paulguindo@altius-group.ch" },
+]
+keywords = ["django", "d3", "d3js", "charts", "visualization", "geodjango", "mqtt", "geojson"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Framework :: Django",
+    "Framework :: Django :: 4.2",
+    "Framework :: Django :: 5.0",
+    "Framework :: Django :: 5.1",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: JavaScript",
+    "Topic :: Scientific/Engineering :: Visualization",
+    "Topic :: Scientific/Engineering :: GIS",
+]
+dependencies = [
+    "Django>=4.2",
+]
+
+[project.optional-dependencies]
+geo = ["django>=4.2"]
+mqtt = ["paho-mqtt>=2.0"]
+all = ["django-d3-bridge[geo,mqtt]"]
+dev = [
+    "pytest>=7",
+    "pytest-django>=4.5",
+    "pytest-cov",
+    "ruff",
+]
+docs = ["mkdocs-material", "mkdocstrings[python]"]
+
+[project.urls]
+Homepage = "https://github.com/Altius-Academy-SNC/django-d3-bridge"
+Documentation = "https://altius-academy-snc.github.io/django-d3-bridge"
+Repository = "https://github.com/Altius-Academy-SNC/django-d3-bridge"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/d3_bridge"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src", "."]
+DJANGO_SETTINGS_MODULE = "tests.settings"
+
+[tool.ruff]
+target-version = "py310"
+line-length = 100

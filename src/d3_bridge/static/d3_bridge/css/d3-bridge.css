@@ -1,0 +1,214 @@
+/* ── D3 Bridge — Base Styles ──────────────────────────────── */
+
+.d3b-chart {
+  position: relative;
+  width: 100%;
+  min-height: 100px;
+}
+
+.d3b-svg {
+  display: block;
+  max-width: 100%;
+}
+
+/* ── Tooltip ─────────────────────────────────────────────── */
+
+.d3b-tooltip {
+  position: absolute;
+  pointer-events: none;
+  opacity: 0;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  line-height: 1.5;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  z-index: 10000;
+  max-width: 300px;
+  transition: opacity 0.15s ease;
+}
+
+.d3b-tooltip strong {
+  display: inline;
+}
+
+/* ── Empty state ─────────────────────────────────────────── */
+
+.d3b-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  color: #999;
+  font-size: 14px;
+  font-style: italic;
+  border: 1px dashed #ddd;
+  border-radius: 8px;
+}
+
+/* ── Axes ────────────────────────────────────────────────── */
+
+.d3b-axis text {
+  font-size: 11px;
+}
+
+.d3b-axis .domain,
+.d3b-axis .tick line {
+  shape-rendering: crispEdges;
+}
+
+.d3b-label {
+  font-weight: 500;
+}
+
+/* ── Grid ────────────────────────────────────────────────── */
+
+.d3b-grid .tick line {
+  shape-rendering: crispEdges;
+}
+
+.d3b-grid .domain {
+  display: none;
+}
+
+/* ── Bar chart ───────────────────────────────────────────── */
+
+.d3b-bar {
+  transition: opacity 0.15s ease;
+}
+
+.d3b-bar:hover {
+  opacity: 0.85;
+}
+
+/* ── Line chart ──────────────────────────────────────────── */
+
+.d3b-line {
+  fill: none;
+}
+
+.d3b-dot {
+  transition: r 0.15s ease;
+}
+
+/* ── Pie / Donut ─────────────────────────────────────────── */
+
+.d3b-slice {
+  transition: transform 0.15s ease;
+}
+
+.d3b-pie-label {
+  pointer-events: none;
+}
+
+/* ── Scatter ─────────────────────────────────────────────── */
+
+.d3b-point {
+  transition: opacity 0.15s ease, r 0.15s ease;
+}
+
+.d3b-regression {
+  pointer-events: none;
+}
+
+/* ── Geo ─────────────────────────────────────────────────── */
+
+.d3b-geo-feature {
+  transition: stroke-width 0.15s ease;
+}
+
+/* ── Network ─────────────────────────────────────────────── */
+
+.d3b-nodes circle {
+  transition: stroke-width 0.15s ease;
+}
+
+.d3b-sankey-link {
+  transition: stroke-opacity 0.15s ease;
+}
+
+/* ── MQTT Live Indicator ─────────────────────────────────── */
+
+.d3b-mqtt-status {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  z-index: 10;
+}
+
+.d3b-mqtt-connected {
+  background: rgba(25, 135, 84, 0.1);
+  color: #198754;
+  border: 1px solid rgba(25, 135, 84, 0.3);
+}
+
+.d3b-mqtt-disconnected {
+  background: rgba(220, 53, 69, 0.1);
+  color: #dc3545;
+  border: 1px solid rgba(220, 53, 69, 0.3);
+}
+
+/* ── Poll Indicator ──────────────────────────────────────── */
+
+.d3b-poll-status {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  z-index: 10;
+  background: rgba(13, 110, 253, 0.1);
+  color: #0d6efd;
+  border: 1px solid rgba(13, 110, 253, 0.3);
+}
+
+/* ── Legend ───────────────────────────────────────────────── */
+
+.d3b-legend text {
+  font-size: 11px;
+}
+
+/* ── Responsive ──────────────────────────────────────────── */
+
+@media (max-width: 576px) {
+  .d3b-chart {
+    overflow-x: auto;
+  }
+
+  .d3b-axis text {
+    font-size: 10px;
+  }
+
+  .d3b-tooltip {
+    font-size: 11px;
+    max-width: 200px;
+  }
+}
+
+/* ── Dark theme overrides (via CSS class) ────────────────── */
+
+.d3b-chart[data-theme="dark"] .d3b-empty {
+  color: #666;
+  border-color: #444;
+}
+
+/* ── Print ───────────────────────────────────────────────── */
+
+@media print {
+  .d3b-tooltip,
+  .d3b-mqtt-status {
+    display: none !important;
+  }
+
+  .d3b-chart {
+    break-inside: avoid;
+  }
+}
