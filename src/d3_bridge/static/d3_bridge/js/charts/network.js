@@ -11,11 +11,7 @@
     var animate = config.animate !== false;
 
     if (!graphData.nodes.length) {
-      d3.select("#" + containerId)
-        .append("div")
-        .attr("class", "d3b-empty")
-        .text("No data");
-      return { svg: null, update: function () {}, destroy: function () {} };
+      return u.renderEmpty(containerId, config);
     }
 
     var ctx = u.createSvg(containerId, config);
@@ -228,11 +224,7 @@
     var graphData = config.data || { nodes: [], links: [] };
 
     if (!graphData.nodes.length) {
-      d3.select("#" + containerId)
-        .append("div")
-        .attr("class", "d3b-empty")
-        .text("No data");
-      return { svg: null, update: function () {}, destroy: function () {} };
+      return u.renderEmpty(containerId, config);
     }
 
     var ctx = u.createSvg(containerId, config);

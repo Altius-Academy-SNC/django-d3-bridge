@@ -13,8 +13,7 @@
     var duration = config.animationDuration || 750;
 
     if (!data.length) {
-      d3.select("#" + containerId).append("div").attr("class", "d3b-empty").text("No data");
-      return { svg: null, update: function () {}, destroy: function () {} };
+      return u.renderEmpty(containerId, config);
     }
 
     var ctx = u.createSvg(containerId, config);
@@ -105,8 +104,7 @@
     var duration = config.animationDuration || 750;
 
     if (!data.length) {
-      d3.select("#" + containerId).append("div").attr("class", "d3b-empty").text("No data");
-      return { svg: null, update: function () {}, destroy: function () {} };
+      return u.renderEmpty(containerId, config);
     }
 
     var ctx = u.createSvg(containerId, config);

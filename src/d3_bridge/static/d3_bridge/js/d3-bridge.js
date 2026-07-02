@@ -13,6 +13,7 @@ var D3Bridge = (function () {
 
   var _renderers = {};
   var _charts = {};
+  var _observers = {};
 
   // ── Utilities ──────────────────────────────────────────────
 
@@ -89,6 +90,36 @@ var D3Bridge = (function () {
       innerHeight: innerHeight,
       margin: margin,
       theme: theme,
+    };
+  }
+
+  /**
+   * Render the empty state ("No data") into the container.
+   *
+   * Clears any previous content first so repeated renders never stack,
+   * and pins the placeholder to the configured chart height so the
+   * container's size stays stable (a growing container would retrigger
+   * the responsive ResizeObserver). Returns a stub instance whose
+   * update() re-renders the chart once data arrives (poll/MQTT).
+   */
+  function renderEmpty(containerId, config) {
+    var container = d3.select("#" + containerId);
+    container.selectAll("*").remove();
+    container
+      .append("div")
+      .attr("class", "d3b-empty")
+      .style("height", (config.height || 400) + "px")
+      .text(config.emptyText || "No data");
+    return {
+      svg: null,
+      empty: true,
+      update: function (newData) {
+        config.data = newData;
+        D3Bridge.render(containerId, config);
+      },
+      destroy: function () {
+        container.selectAll("*").remove();
+      },
     };
   }
 
@@ -283,8 +314,24 @@ var D3Bridge = (function () {
   function makeResponsive(containerId, config, renderFn) {
     if (!config.responsive) return;
 
+    // Replace any observer left over from a previous render
+    if (_observers[containerId]) {
+      _observers[containerId].disconnect();
+      delete _observers[containerId];
+    }
+
+    var el = document.getElementById(containerId);
+    if (!el) return;
+
+    var lastWidth = el.getBoundingClientRect().width;
     var resizeTimer;
     var observer = new ResizeObserver(function () {
+      // Only re-render on real width changes: height changes caused by
+      // the chart's own content (e.g. the empty-state placeholder) must
+      // not retrigger a render, or we'd loop forever.
+      var width = el.getBoundingClientRect().width;
+      if (Math.abs(width - lastWidth) < 1) return;
+      lastWidth = width;
       clearTimeout(resizeTimer);
       resizeTimer = setTimeout(function () {
         var instance = _charts[containerId];
@@ -294,8 +341,8 @@ var D3Bridge = (function () {
       }, 200);
     });
 
-    var el = document.getElementById(containerId);
-    if (el) observer.observe(el);
+    observer.observe(el);
+    _observers[containerId] = observer;
   }
 
   // ── Public API ─────────────────────────────────────────────
@@ -346,6 +393,11 @@ var D3Bridge = (function () {
   }
 
   function destroyChart(containerId) {
+    // Disconnect the responsive observer
+    if (_observers[containerId]) {
+      _observers[containerId].disconnect();
+      delete _observers[containerId];
+    }
     // Stop polling if active
     if (typeof D3BridgePoll !== "undefined") {
       D3BridgePoll.stop(containerId);
@@ -371,6 +423,7 @@ var D3Bridge = (function () {
     _: {
       createSvg: createSvg,
       createTooltip: createTooltip,
+      renderEmpty: renderEmpty,
       formatValue: formatValue,
       colorScale: colorScale,
       addGrid: addGrid,
