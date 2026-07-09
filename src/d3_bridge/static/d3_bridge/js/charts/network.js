@@ -157,6 +157,17 @@
 
     // Tick
     simulation.on("tick", function () {
+      // Clamp to the container on every tick (not just the final frame) so
+      // mutual repulsion pushes nodes out to fill the actual rectangle.
+      // Charge/link-distance alone settle into a roughly circular blob sized
+      // independently of the container, which overflows short/wide (or
+      // narrow/tall) containers while leaving most of the space empty.
+      nodes.forEach(function (d) {
+        var r = nodeSizeScale ? nodeSizeScale(+d[config.nodeSize]) : (typeof config.nodeSize === "number" ? config.nodeSize : 8);
+        d.x = Math.max(r, Math.min(iW - r, d.x));
+        d.y = Math.max(r, Math.min(iH - r, d.y));
+      });
+
       linkElements
         .attr("x1", function (d) { return d.source.x; })
         .attr("y1", function (d) { return d.source.y; })

@@ -44,7 +44,7 @@
         .thresholds(config.thresholds || 10);
 
       var contours = contourGen(values);
-      var palette = theme.palette || d3.schemeBlues[9];
+      var palette = u.resolvePalette(theme.palette || d3.schemeBlues[9]);
       var colorFn = d3.scaleSequential()
         .domain(d3.extent(values))
         .interpolator(d3.interpolateRgbBasis(palette.slice(0, 5)));
@@ -68,7 +68,7 @@
         .bandwidth(20)
         .thresholds(config.thresholds || 10)(data);
 
-      var palette = theme.palette || d3.schemeBlues[9];
+      var palette = u.resolvePalette(theme.palette || d3.schemeBlues[9]);
       var maxDensity = d3.max(density, function (d) { return d.value; });
       var colorFn = d3.scaleSequential()
         .domain([0, maxDensity])
@@ -132,7 +132,7 @@
       .bandwidth(config.bandwidth || 20)
       .thresholds(config.thresholds || 20)(data);
 
-    var palette = theme.palette || d3.schemeBlues[9];
+    var palette = u.resolvePalette(theme.palette || d3.schemeBlues[9]);
     var maxDensity = d3.max(density, function (d) { return d.value; });
     var colorFn = d3.scaleSequential()
       .domain([0, maxDensity])

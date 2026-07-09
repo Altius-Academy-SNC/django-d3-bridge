@@ -23,6 +23,8 @@
     var iW = ctx.innerWidth;
     var iH = ctx.innerHeight;
 
+    u.normalizeGeoWinding(geojson);
+
     // Projection
     var projectionMap = {
       mercator: d3.geoMercator,
@@ -66,12 +68,13 @@
           .domain(thresholds)
           .range(palette.slice(0, thresholds.length + 1));
       } else {
+        var resolvedPalette = u.resolvePalette(palette);
         colorScaleFn = d3
           .scaleSequential()
           .domain(extent)
           .interpolator(
             d3.interpolateRgbBasis(
-              palette.length > 3 ? palette.slice(0, 5) : palette
+              resolvedPalette.length > 3 ? resolvedPalette.slice(0, 5) : resolvedPalette
             )
           );
       }

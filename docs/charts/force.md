@@ -70,3 +70,10 @@ chart = ForceGraph(
 | `charge_strength` | float | `-200` | Repulsion force (more negative = more spread) |
 | `draggable` | bool | `True` | Allow dragging nodes |
 | `zoom` | bool | `True` | Enable zoom/pan |
+
+!!! note
+    Nodes are clamped to the chart's inner container on every simulation
+    tick, so the graph fills the available rectangle instead of settling
+    into a `charge_strength`/`link_distance`-sized blob centered in it —
+    this matters most for very wide or very tall containers, where an
+    unclamped layout would otherwise leave most of the space empty.

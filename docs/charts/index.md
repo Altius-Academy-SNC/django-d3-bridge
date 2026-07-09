@@ -60,7 +60,7 @@ All charts inherit these from the base `Chart` class:
 | `theme` | str | `"default"` | Theme name |
 | `palette` | str or list | `None` | Override the theme's color palette |
 | `animate` | bool | `True` | Enable entry animations |
-| `tooltip` | bool or list | `True` | Enable tooltips (`True`, `False`, or list of fields) |
+| `tooltip` | bool or list | `True` | `True`/`False` enable or disable tooltips on any chart. A list of field names filters *which* fields are shown, but only on [Choropleth](choropleth.md)/[Bubble Map](bubblemap.md), where the tooltip is built from an open-ended feature-properties dict. Every other chart type builds its tooltip from a small, fixed set of fields already chosen for that chart (e.g. category + value); a list there is treated the same as `True`. |
 | `legend` | bool | `True` | Show legend |
 | `responsive` | bool | `True` | Auto-resize on container change |
 | `poll_url` | str | `None` | URL for auto-refresh polling |

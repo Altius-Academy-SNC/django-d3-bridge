@@ -171,6 +171,75 @@ var D3Bridge = (function () {
     return d3.scaleOrdinal().domain(domain || []).range(palette);
   }
 
+  var _colorProbe = null;
+  var _colorCache = {};
+
+  /**
+   * Resolve a CSS color to a concrete rgb()/rgba() string via the browser's
+   * own style engine. d3.interpolateRgbBasis (and other d3-color consumers)
+   * only understand hex/rgb/hsl/named colors — CSS custom properties
+   * (var(--x)) and modern color functions (oklch(), color-mix(), ...) parse
+   * to null and silently interpolate to black. Colors d3 already understands
+   * are returned unchanged.
+   */
+  function resolveColor(value) {
+    if (typeof value !== "string") return value;
+    if (d3.color(value)) return value;
+    if (_colorCache.hasOwnProperty(value)) return _colorCache[value];
+    if (typeof document === "undefined" || typeof getComputedStyle === "undefined") {
+      return value;
+    }
+    if (!_colorProbe) {
+      _colorProbe = document.createElement("span");
+      _colorProbe.style.display = "none";
+      document.body.appendChild(_colorProbe);
+    }
+    _colorProbe.style.color = "";
+    _colorProbe.style.color = value;
+    var resolved = getComputedStyle(_colorProbe).color || value;
+    _colorCache[value] = resolved;
+    return resolved;
+  }
+
+  /**
+   * Resolve every color in a palette array (see resolveColor).
+   */
+  function resolvePalette(palette) {
+    return (palette || []).map(resolveColor);
+  }
+
+  /**
+   * Rewind Polygon/MultiPolygon rings to the winding order d3-geo's
+   * spherical clipping expects. GeoJSON exporters (PostGIS ST_AsGeoJSON,
+   * QGIS, ...) commonly follow the RFC 7946 "right-hand rule" convention,
+   * which d3-geo's default antimeridian clip does not — a mismatched ring
+   * is read as a hole covering the rest of the sphere, which both corrupts
+   * the rendered shape and collapses projection.fitSize()'s computed scale.
+   * d3.geoArea() is d3-geo's own test for this: a ring wound the way it
+   * expects encloses its true (small) area; wound the other way, it
+   * encloses the complement (> 2π steradians, i.e. more than a hemisphere).
+   */
+  function normalizeGeoWinding(geojson) {
+    function fixRing(coordinates) {
+      if (d3.geoArea({ type: "Polygon", coordinates: coordinates }) > 2 * Math.PI) {
+        return coordinates.map(function (ring) { return ring.slice().reverse(); });
+      }
+      return coordinates;
+    }
+    function fixGeometry(geometry) {
+      if (!geometry) return;
+      if (geometry.type === "Polygon") {
+        geometry.coordinates = fixRing(geometry.coordinates);
+      } else if (geometry.type === "MultiPolygon") {
+        geometry.coordinates = geometry.coordinates.map(fixRing);
+      } else if (geometry.type === "GeometryCollection") {
+        (geometry.geometries || []).forEach(fixGeometry);
+      }
+    }
+    (geojson.features || []).forEach(function (f) { fixGeometry(f.geometry); });
+    return geojson;
+  }
+
   /**
    * Add grid lines to a chart.
    */
@@ -426,6 +495,9 @@ var D3Bridge = (function () {
       renderEmpty: renderEmpty,
       formatValue: formatValue,
       colorScale: colorScale,
+      resolveColor: resolveColor,
+      resolvePalette: resolvePalette,
+      normalizeGeoWinding: normalizeGeoWinding,
       addGrid: addGrid,
       addAxes: addAxes,
       addLegend: addLegend,

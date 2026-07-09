@@ -1,6 +1,6 @@
 """django-d3-bridge — Declarative D3.js visualizations for Django."""
 
-__version__ = "0.1.2"
+__version__ = "0.1.3"
 
 default_app_config = "d3_bridge.apps.D3BridgeConfig"
 

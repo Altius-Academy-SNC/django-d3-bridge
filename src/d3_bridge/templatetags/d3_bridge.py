@@ -27,6 +27,8 @@ register = template.Library()
 D3_VERSION = "7"
 D3_CDN = f"https://cdn.jsdelivr.net/npm/d3@{D3_VERSION}"
 MQTT_CDN = "https://cdn.jsdelivr.net/npm/mqtt@5/dist/mqtt.min.js"
+SANKEY_CDN = "https://cdn.jsdelivr.net/npm/d3-sankey@0.12.3/dist/d3-sankey.min.js"
+SANKEY_INTEGRITY = "sha384-SM54CE5h+qdDI046d2Y5ym7wq1kq4uxcQ1cqGq5/+5jrE5tPLeDJSq711Q8sIska"
 
 
 class _BridgeEncoder(json.JSONEncoder):
@@ -39,16 +41,21 @@ class _BridgeEncoder(json.JSONEncoder):
 
 
 @register.simple_tag
-def d3_scripts(cdn=True):
+def d3_scripts(cdn=True, sankey=False):
     """Load D3.js and the D3 Bridge runtime. Call once per page, in <head> or before charts.
 
     Args:
         cdn: If True (default), load D3 from CDN. If False, load from static files.
+        sankey: If True, also load the d3-sankey plugin from CDN (required by the
+            Sankey chart type, which is not part of core D3). Can also be enabled
+            globally via ``D3_BRIDGE = {"SANKEY": True}`` in settings.
     """
     use_cdn = cdn
+    use_sankey = sankey
     # Allow settings override
     if hasattr(settings, "D3_BRIDGE"):
         use_cdn = settings.D3_BRIDGE.get("CDN", cdn)
+        use_sankey = settings.D3_BRIDGE.get("SANKEY", sankey)
 
     if use_cdn:
         d3_src = D3_CDN
@@ -58,6 +65,12 @@ def d3_scripts(cdn=True):
 
     from django.templatetags.static import static
     runtime_src = static("d3_bridge/js/d3-bridge.js")
+
+    sankey_script = (
+        f'<script src="{SANKEY_CDN}" integrity="{SANKEY_INTEGRITY}" crossorigin="anonymous"></script>'
+        if use_sankey
+        else ""
+    )
 
     # Chart modules
     chart_types = [
@@ -83,6 +96,7 @@ def d3_scripts(cdn=True):
 
     return mark_safe(f"""<link rel="stylesheet" href="{css_src}">
 <script src="{d3_src}"></script>
+{sankey_script}
 <script src="{runtime_src}"></script>
 {chart_scripts}
 {poll_script}

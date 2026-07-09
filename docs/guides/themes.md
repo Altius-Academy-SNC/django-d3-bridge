@@ -48,13 +48,20 @@ chart = BarChart(
 )
 ```
 
+!!! note
+    CSS custom properties and modern color functions (`var(--brand-500)`,
+    `oklch(60% 0.15 250)`, ...) work too — the runtime resolves them
+    through the browser's own style engine before handing them to D3, so
+    they behave the same as a plain hex value on every chart type,
+    including sequential color scales (Contour, Density, Choropleth).
+
 ## Theme Properties
 
 Each theme is a dictionary with these keys:
 
 | Property | Description |
 |----------|-------------|
-| `palette` | List of hex colors for data encoding |
+| `palette` | List of colors for data encoding — hex, `rgb()`/`hsl()`, named colors, CSS custom properties (`var(--brand-500)`), or modern color functions (`oklch()`, `color-mix()`, ...) |
 | `background` | Chart background (`"transparent"` or hex) |
 | `fontFamily` | Font family (`"inherit"` = from page CSS) |
 | `fontSize` | Base font size (px) |

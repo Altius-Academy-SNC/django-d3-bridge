@@ -73,3 +73,12 @@ chart = ChoroplethMap(
 | `stroke_width` | float | `0.5` | Border width |
 | `null_color` | str | `"#ccc"` | Color for missing values |
 | `zoom` | bool | `True` | Enable zoom/pan |
+
+!!! note
+    GeoJSON ring winding is normalized automatically before rendering.
+    Exporters disagree on winding order (PostGIS `ST_AsGeoJSON` and QGIS
+    follow the RFC 7946 right-hand rule; other tools don't), and a ring
+    wound the way d3-geo's spherical clipping doesn't expect is read as a
+    hole covering the rest of the sphere — which both distorts the shape
+    and corrupts the computed map scale. You do not need to pre-process
+    your data either way.

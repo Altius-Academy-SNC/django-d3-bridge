@@ -57,7 +57,12 @@ class Chart:
         # Escape hatch
         self._extra_js: str | None = None
 
-        # Tooltip
+        # Tooltip. True/False enable or disable tooltips on any chart type.
+        # A list of field names filters which fields are shown, but this is
+        # only honored by Choropleth/BubbleMap (whose tooltip is built from
+        # an open-ended feature-properties dict); other chart types build
+        # their tooltip from a small fixed set of fields already, and treat
+        # a list the same as True.
         self.tooltip: bool | list[str] = kw.pop("tooltip", True)
 
         # Legend

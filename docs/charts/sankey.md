@@ -30,11 +30,15 @@ chart = Sankey(
 ```
 
 !!! note
-    Sankey requires the [d3-sankey](https://github.com/d3/d3-sankey) plugin.
-    Add it before `{% d3_scripts %}`:
+    Sankey requires the [d3-sankey](https://github.com/d3/d3-sankey) plugin, which is
+    not loaded by default. Enable it with `{% d3_scripts sankey=True %}`, or globally
+    for every page via `D3_BRIDGE = {"SANKEY": True}` in settings. Alternatively, add
+    the script tag yourself before `{% d3_scripts %}`:
     ```html
     <script src="https://cdn.jsdelivr.net/npm/d3-sankey@0.12"></script>
     ```
+    If the plugin isn't loaded, the chart renders an inline message instead of failing
+    silently.
 
 ## Parameters
 

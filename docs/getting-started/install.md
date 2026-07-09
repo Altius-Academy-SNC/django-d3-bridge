@@ -45,6 +45,7 @@ That's the minimum. No database migrations, no middleware, no extra config.
 D3_BRIDGE = {
     "CDN": True,       # Load D3.js from CDN (default: True)
     "MQTT": False,     # Include MQTT.js globally (default: False)
+    "SANKEY": False,   # Include the d3-sankey plugin globally (default: False)
 }
 ```
 
@@ -52,6 +53,7 @@ D3_BRIDGE = {
 |---------|---------|-------------|
 | `CDN` | `True` | If `True`, loads D3.js from jsDelivr CDN. Set `False` to serve from your own static files. |
 | `MQTT` | `False` | If `True`, includes the MQTT.js client globally via `{% d3_scripts %}`. Only needed if you use `live=True` on charts. |
+| `SANKEY` | `False` | If `True`, includes the [d3-sankey](https://github.com/d3/d3-sankey) plugin globally via `{% d3_scripts %}`. Only needed if you use the [Sankey](../charts/sankey.md) chart type — it can also be enabled per-page with `{% d3_scripts sankey=True %}` instead. |
 
 ## Verify Installation
 
