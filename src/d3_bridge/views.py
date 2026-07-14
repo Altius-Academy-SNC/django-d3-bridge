@@ -27,22 +27,11 @@ Usage::
 
 from __future__ import annotations
 
-import json
-from datetime import date, datetime
-from decimal import Decimal
 from django.http import JsonResponse
 from django.views import View
 
 from d3_bridge.data.serializers import serialize_data
-
-
-class _ChartEncoder(json.JSONEncoder):
-    def default(self, obj):
-        if isinstance(obj, (datetime, date)):
-            return obj.isoformat()
-        if isinstance(obj, Decimal):
-            return float(obj)
-        return super().default(obj)
+from d3_bridge.encoders import BridgeJSONEncoder
 
 
 class ChartDataView(View):
@@ -54,7 +43,8 @@ class ChartDataView(View):
         geojson:        If True, serialize as GeoJSON FeatureCollection.
         geometry_field: Name of geometry field (auto-detected if None).
         ordering:       Field(s) to order by. None = queryset default.
-        limit:          Max number of records. None = no limit.
+        limit:          Max number of records, applied after ``filter_queryset()``.
+                        None = no limit.
     """
 
     queryset = None
@@ -73,8 +63,6 @@ class ChartDataView(View):
         qs = qs.all()
         if self.ordering:
             qs = qs.order_by(self.ordering) if isinstance(self.ordering, str) else qs.order_by(*self.ordering)
-        if self.limit:
-            qs = qs[:self.limit]
         return qs
 
     def filter_queryset(self, qs):
@@ -82,8 +70,10 @@ class ChartDataView(View):
         return qs
 
     def get(self, request, *args, **kwargs):
-        qs = self.get_queryset()
-        qs = self.filter_queryset(qs)
+        qs = self.filter_queryset(self.get_queryset())
+        # Slice only after filtering — a filter on a sliced queryset raises
+        if self.limit:
+            qs = qs[:self.limit]
 
         data = serialize_data(
             qs,
@@ -95,5 +85,5 @@ class ChartDataView(View):
         return JsonResponse(
             data,
             safe=False,
-            encoder=_ChartEncoder,
+            encoder=BridgeJSONEncoder,
         )

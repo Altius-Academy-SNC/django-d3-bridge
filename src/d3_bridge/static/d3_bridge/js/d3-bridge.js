@@ -42,13 +42,21 @@ var D3Bridge = (function () {
       container.style("background-color", theme.background);
     }
 
+    var ariaLabel =
+      config.title || (config.type ? config.type + " chart" : "chart");
+
     var svg = container
       .append("svg")
       .attr("width", width)
       .attr("height", height)
       .attr("class", "d3b-svg")
+      .attr("role", "img")
+      .attr("aria-label", ariaLabel)
       .attr("font-family", theme.fontFamily || "inherit")
       .attr("font-size", theme.fontSize || 12);
+
+    // Accessible name for SVG-aware assistive tech
+    svg.append("title").text(ariaLabel);
 
     var g = svg
       .append("g")

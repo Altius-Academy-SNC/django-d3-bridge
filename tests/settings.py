@@ -6,6 +6,7 @@ INSTALLED_APPS = [
     "django.contrib.contenttypes",
     "django.contrib.staticfiles",
     "d3_bridge",
+    "tests",
 ]
 
 DATABASES = {

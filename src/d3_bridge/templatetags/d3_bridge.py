@@ -14,13 +14,13 @@ Usage::
 
 from __future__ import annotations
 
-import json
-from datetime import date, datetime
-from decimal import Decimal
-
 from django import template
 from django.conf import settings
+from django.utils.html import escape
 from django.utils.safestring import mark_safe
+
+from d3_bridge.encoders import dumps_script_safe
+from d3_bridge.themes import resolve_theme
 
 register = template.Library()
 
@@ -31,22 +31,15 @@ SANKEY_CDN = "https://cdn.jsdelivr.net/npm/d3-sankey@0.12.3/dist/d3-sankey.min.j
 SANKEY_INTEGRITY = "sha384-SM54CE5h+qdDI046d2Y5ym7wq1kq4uxcQ1cqGq5/+5jrE5tPLeDJSq711Q8sIska"
 
 
-class _BridgeEncoder(json.JSONEncoder):
-    def default(self, obj):
-        if isinstance(obj, (datetime, date)):
-            return obj.isoformat()
-        if isinstance(obj, Decimal):
-            return float(obj)
-        return super().default(obj)
-
-
 @register.simple_tag
 def d3_scripts(cdn=True, sankey=False):
     """Load D3.js and the D3 Bridge runtime. Call once per page, in <head> or before charts.
 
     Args:
-        cdn: If True (default), load D3 from CDN. If False, load from static files.
-        sankey: If True, also load the d3-sankey plugin from CDN (required by the
+        cdn: If True (default), load D3 (and d3-sankey/mqtt.js when enabled)
+            from CDN. If False, load the vendored copies from static files —
+            fully offline, no external requests.
+        sankey: If True, also load the d3-sankey plugin (required by the
             Sankey chart type, which is not part of core D3). Can also be enabled
             globally via ``D3_BRIDGE = {"SANKEY": True}`` in settings.
     """
@@ -57,20 +50,25 @@ def d3_scripts(cdn=True, sankey=False):
         use_cdn = settings.D3_BRIDGE.get("CDN", cdn)
         use_sankey = settings.D3_BRIDGE.get("SANKEY", sankey)
 
+    from django.templatetags.static import static
+
     if use_cdn:
         d3_src = D3_CDN
     else:
-        from django.templatetags.static import static
         d3_src = static("d3_bridge/js/d3.v7.min.js")
 
-    from django.templatetags.static import static
     runtime_src = static("d3_bridge/js/d3-bridge.js")
 
-    sankey_script = (
-        f'<script src="{SANKEY_CDN}" integrity="{SANKEY_INTEGRITY}" crossorigin="anonymous"></script>'
-        if use_sankey
-        else ""
-    )
+    if use_sankey:
+        if use_cdn:
+            sankey_script = (
+                f'<script src="{SANKEY_CDN}" integrity="{SANKEY_INTEGRITY}"'
+                ' crossorigin="anonymous"></script>'
+            )
+        else:
+            sankey_script = f'<script src="{static("d3_bridge/js/d3-sankey.min.js")}"></script>'
+    else:
+        sankey_script = ""
 
     # Chart modules
     chart_types = [
@@ -88,8 +86,9 @@ def d3_scripts(cdn=True, sankey=False):
 
     mqtt_script = ""
     if getattr(settings, "D3_BRIDGE", {}).get("MQTT", False):
+        mqtt_lib_src = MQTT_CDN if use_cdn else static("d3_bridge/js/mqtt.min.js")
         mqtt_src = static("d3_bridge/js/mqtt.js")
-        mqtt_script = f"""<script src="{MQTT_CDN}"></script>
+        mqtt_script = f"""<script src="{mqtt_lib_src}"></script>
 <script src="{mqtt_src}"></script>"""
 
     css_src = static("d3_bridge/css/d3-bridge.css")
@@ -110,24 +109,33 @@ def d3_render(chart, **kwargs):
     Args:
         chart: A d3_bridge.Chart instance.
         **kwargs: Override chart options (theme, height, width, palette, etc.).
+            Overrides apply to this rendering only — the chart instance is
+            never mutated, so the same chart can be rendered several times
+            with different options.
     """
-    # Apply overrides
-    for key, val in kwargs.items():
-        if key == "theme":
-            chart.theme = val
-        elif key == "palette":
-            chart.palette = val
-        elif key == "height":
-            chart.height = int(val)
-        elif key == "width":
-            chart.width = int(val)
-        elif key == "title":
-            chart.title = val
-        elif key == "animate":
-            chart.animate = val
-
     config = chart.to_config()
-    config_json = json.dumps(config, cls=_BridgeEncoder, ensure_ascii=False)
+
+    # Apply per-render overrides on the config copy, not on the instance
+    if "theme" in kwargs or "palette" in kwargs:
+        config["theme"] = resolve_theme(
+            kwargs.get("theme", chart.theme),
+            palette_override=kwargs.get("palette", chart.palette),
+        )
+    if "height" in kwargs:
+        config["height"] = int(kwargs["height"])
+    if "width" in kwargs:
+        config["width"] = int(kwargs["width"])
+    if "title" in kwargs:
+        config["title"] = kwargs["title"]
+    if "animate" in kwargs:
+        config["animate"] = kwargs["animate"]
+
+    config_json = dumps_script_safe(config)
+    # chart.id may be user-supplied: escape for the HTML attribute, JSON-encode
+    # for the JS string literal.
+    id_attr = escape(chart.id)
+    type_attr = escape(chart.chart_type)
+    id_js = dumps_script_safe(chart.id)
 
     # Build MQTT script tag if needed
     mqtt_tag = ""
@@ -135,15 +143,15 @@ def d3_render(chart, **kwargs):
         mqtt_tag = f"""
 <script src="{MQTT_CDN}"></script>"""
 
-    html = f"""<div id="{chart.id}" class="d3b-chart d3b-{chart.chart_type}" data-d3b-type="{chart.chart_type}"></div>{mqtt_tag}
+    html = f"""<div id="{id_attr}" class="d3b-chart d3b-{type_attr}" data-d3b-type="{type_attr}"></div>{mqtt_tag}
 <script>
 (function() {{
   var config = {config_json};
   if (typeof D3Bridge !== 'undefined') {{
-    D3Bridge.render("{chart.id}", config);
+    D3Bridge.render({id_js}, config);
   }} else {{
     document.addEventListener("DOMContentLoaded", function() {{
-      D3Bridge.render("{chart.id}", config);
+      D3Bridge.render({id_js}, config);
     }});
   }}
 }})();
@@ -154,6 +162,5 @@ def d3_render(chart, **kwargs):
 
 @register.simple_tag
 def d3_json(chart):
-    """Output just the JSON config for a chart (useful for JS-side rendering)."""
-    config = chart.to_config()
-    return mark_safe(json.dumps(config, cls=_BridgeEncoder, ensure_ascii=False))
+    """Output the JSON config for a chart, escaped for safe inlining in <script>."""
+    return mark_safe(dumps_script_safe(chart.to_config()))

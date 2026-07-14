@@ -76,9 +76,16 @@ chart = BarChart(
     data=data, x="x", y="y",
     poll_url="/api/data/",
     poll_interval=30,
-    poll_headers={"Authorization": "Bearer my-token"},
+    poll_headers={"X-Requested-With": "d3-bridge"},
 )
 ```
+
+!!! warning "Don't put secrets in `poll_headers`"
+    Header values are embedded **in clear text** in the page's HTML (inside the
+    chart's JSON config), visible to anyone who can view the page source.
+    Never put API keys or bearer tokens there. Prefer Django's session/cookie
+    authentication — the poller already sends same-origin credentials and the
+    CSRF token automatically.
 
 ## ChartDataView
 

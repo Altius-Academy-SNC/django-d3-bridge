@@ -79,10 +79,12 @@ nav:
       - Serializers: api/serializers.md
       - Template Tags: api/templatetags.md
       - Views: api/views.md
+  - Changelog: changelog.md
 
 markdown_extensions:
   - admonition
   - pymdownx.details
+  - pymdownx.snippets
   - pymdownx.superfences
   - pymdownx.highlight:
       anchor_linenums: true

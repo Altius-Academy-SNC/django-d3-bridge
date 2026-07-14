@@ -79,7 +79,9 @@ chart = LineChart(
 - Pure D3.js v7 output — inspectable, no abstraction layer
 - Django QuerySet + GeoQuerySet + DataFrame serialization
 - 4 themes (default, dark, bootstrap, terraf) + 7 color palettes
-- Responsive, animated, with tooltips
+- Responsive, animated, with tooltips — SVGs carry `role="img"` + `aria-label`
+- XSS-safe rendering: chart configs are escaped like Django's `json_script`
+- Works fully offline: D3, d3-sankey and mqtt.js vendored (`{% d3_scripts cdn=False %}`)
 - Bootstrap grid compatible
 - Escape hatch for custom D3.js code
 
@@ -88,6 +90,8 @@ chart = LineChart(
 Full documentation with examples for every chart type:
 
 **https://altius-academy-snc.github.io/django-d3-bridge**
+
+See [CHANGELOG.md](CHANGELOG.md) for release notes.
 
 ## License
 

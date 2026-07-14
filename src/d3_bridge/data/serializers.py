@@ -8,17 +8,6 @@ from decimal import Decimal
 from typing import Any
 
 
-def _default_json(obj):
-    """JSON encoder for Django types."""
-    if isinstance(obj, (datetime, date)):
-        return obj.isoformat()
-    if isinstance(obj, Decimal):
-        return float(obj)
-    if hasattr(obj, "__geo_interface__"):
-        return obj.__geo_interface__
-    raise TypeError(f"Object of type {type(obj)} is not JSON serializable")
-
-
 def _is_geo_queryset(data) -> bool:
     """Check if data is a GeoQuerySet or contains geometry fields."""
     try:

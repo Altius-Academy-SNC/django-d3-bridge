@@ -24,7 +24,7 @@ Options:
 
 ```html
 {% d3_scripts cdn=True %}   {# CDN (default) #}
-{% d3_scripts cdn=False %}  {# Local static files #}
+{% d3_scripts cdn=False %}  {# Vendored static files — fully offline #}
 ```
 
 ### `{% d3_render chart %}`

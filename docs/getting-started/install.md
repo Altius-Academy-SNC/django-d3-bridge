@@ -51,7 +51,7 @@ D3_BRIDGE = {
 
 | Setting | Default | Description |
 |---------|---------|-------------|
-| `CDN` | `True` | If `True`, loads D3.js from jsDelivr CDN. Set `False` to serve from your own static files. |
+| `CDN` | `True` | If `True`, loads D3.js from jsDelivr CDN. Set `False` to serve the copies vendored in the package (D3 v7, and d3-sankey / mqtt.js when enabled) from your static files — fully offline, no external requests. |
 | `MQTT` | `False` | If `True`, includes the MQTT.js client globally via `{% d3_scripts %}`. Only needed if you use `live=True` on charts. |
 | `SANKEY` | `False` | If `True`, includes the [d3-sankey](https://github.com/d3/d3-sankey) plugin globally via `{% d3_scripts %}`. Only needed if you use the [Sankey](../charts/sankey.md) chart type — it can also be enabled per-page with `{% d3_scripts sankey=True %}` instead. |
 
