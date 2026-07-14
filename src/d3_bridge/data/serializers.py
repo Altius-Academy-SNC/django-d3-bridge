@@ -12,13 +12,16 @@ def _is_geo_queryset(data) -> bool:
     """Check if data is a GeoQuerySet or contains geometry fields."""
     try:
         from django.contrib.gis.db.models import GeometryField
+    except Exception:
+        # ImportError without django.contrib.gis, but Django raises
+        # ImproperlyConfigured when GDAL itself is missing — either way,
+        # no GIS support means no geo queryset.
+        return False
 
-        if hasattr(data, "model"):
-            for field in data.model._meta.get_fields():
-                if isinstance(field, GeometryField):
-                    return True
-    except ImportError:
-        pass
+    if hasattr(data, "model"):
+        for field in data.model._meta.get_fields():
+            if isinstance(field, GeometryField):
+                return True
     return False
 
 

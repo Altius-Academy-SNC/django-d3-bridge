@@ -27,6 +27,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Chart.to_json()` now uses the shared bridge encoder and therefore handles
   `Decimal`, `date`/`datetime` and geometry values, consistently with
   `{% d3_render %}` and `ChartDataView`.
+- Serializing a QuerySet no longer crashes with `ImproperlyConfigured` on
+  systems where `django.contrib.gis` is importable but GDAL is not installed —
+  the geo-queryset detection now treats "no GDAL" as "no GIS support".
 - `{% d3_render %}` no longer mutates the chart instance: per-render overrides
   (`theme=`, `height=`, …) are applied to the rendered config only, so the
   same chart can be rendered multiple times with different options.
