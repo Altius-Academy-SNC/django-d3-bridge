@@ -8,7 +8,7 @@ from uuid import uuid4
 
 from d3_bridge.data.serializers import serialize_data
 from d3_bridge.encoders import BridgeJSONEncoder
-from d3_bridge.themes import resolve_theme
+from d3_bridge.themes import resolve_theme_pair
 
 
 class Chart:
@@ -113,7 +113,7 @@ class Chart:
 
     def to_config(self) -> dict:
         """Full config dict ready for JSON serialization to JS runtime."""
-        theme_resolved = resolve_theme(self.theme, palette_override=self.palette)
+        theme_resolved, theme_dark = resolve_theme_pair(self.theme, palette_override=self.palette)
 
         config = {
             "id": self.id,
@@ -131,6 +131,10 @@ class Chart:
             "tooltip": self.tooltip,
             "legend": self.legend,
         }
+
+        # theme="auto": ship the dark half too; JS follows prefers-color-scheme
+        if theme_dark is not None:
+            config["themeDark"] = theme_dark
 
         # MQTT
         if self.live:

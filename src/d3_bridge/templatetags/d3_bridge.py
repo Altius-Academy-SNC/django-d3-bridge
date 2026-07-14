@@ -20,7 +20,7 @@ from django.utils.html import escape
 from django.utils.safestring import mark_safe
 
 from d3_bridge.encoders import dumps_script_safe
-from d3_bridge.themes import resolve_theme
+from d3_bridge.themes import resolve_theme_pair
 
 register = template.Library()
 
@@ -30,9 +30,62 @@ MQTT_CDN = "https://cdn.jsdelivr.net/npm/mqtt@5/dist/mqtt.min.js"
 SANKEY_CDN = "https://cdn.jsdelivr.net/npm/d3-sankey@0.12.3/dist/d3-sankey.min.js"
 SANKEY_INTEGRITY = "sha384-SM54CE5h+qdDI046d2Y5ym7wq1kq4uxcQ1cqGq5/+5jrE5tPLeDJSq711Q8sIska"
 
+# JS chart modules, in load order
+CHART_MODULES = [
+    "bar", "line", "pie", "scatter", "geo", "network",
+    "chord", "hierarchy", "contour", "voronoi",
+]
+
+# chart type (as users know them) → JS module that renders it
+CHART_TYPE_TO_MODULE = {
+    "bar": "bar",
+    "line": "line",
+    "area": "line",
+    "pie": "pie",
+    "donut": "pie",
+    "scatter": "scatter",
+    "density": "contour",
+    "contour": "contour",
+    "choropleth": "geo",
+    "bubblemap": "geo",
+    "force": "network",
+    "sankey": "network",
+    "chord": "chord",
+    "tree": "hierarchy",
+    "treemap": "hierarchy",
+    "pack": "hierarchy",
+    "sunburst": "hierarchy",
+    "dendrogram": "hierarchy",
+    "voronoi": "voronoi",
+}
+
+
+def _resolve_chart_modules(charts):
+    """Resolve a charts selection (str or list of chart types / module names)
+    to the JS modules to load, preserving CHART_MODULES order."""
+    if isinstance(charts, str):
+        names = [n.strip() for n in charts.split(",") if n.strip()]
+    else:
+        names = [str(n).strip() for n in charts]
+
+    modules = set()
+    for name in names:
+        key = name.lower()
+        if key in CHART_MODULES:
+            modules.add(key)
+        elif key in CHART_TYPE_TO_MODULE:
+            modules.add(CHART_TYPE_TO_MODULE[key])
+        else:
+            valid = sorted(set(CHART_TYPE_TO_MODULE) | set(CHART_MODULES))
+            raise ValueError(
+                f"{{% d3_scripts %}}: unknown chart type {name!r}. "
+                f"Valid names: {', '.join(valid)}"
+            )
+    return [m for m in CHART_MODULES if m in modules], names
+
 
 @register.simple_tag
-def d3_scripts(cdn=True, sankey=False):
+def d3_scripts(cdn=True, sankey=False, charts=None):
     """Load D3.js and the D3 Bridge runtime. Call once per page, in <head> or before charts.
 
     Args:
@@ -42,13 +95,27 @@ def d3_scripts(cdn=True, sankey=False):
         sankey: If True, also load the d3-sankey plugin (required by the
             Sankey chart type, which is not part of core D3). Can also be enabled
             globally via ``D3_BRIDGE = {"SANKEY": True}`` in settings.
+        charts: Restrict which chart modules are loaded. Comma-separated string
+            (or list) of chart types, e.g. ``charts="bar,area"``. Default: all
+            modules. Requesting ``sankey`` automatically loads the d3-sankey
+            plugin. Can also be set globally via ``D3_BRIDGE = {"CHARTS": [...]}``.
     """
     use_cdn = cdn
     use_sankey = sankey
+    use_charts = charts
     # Allow settings override
     if hasattr(settings, "D3_BRIDGE"):
         use_cdn = settings.D3_BRIDGE.get("CDN", cdn)
         use_sankey = settings.D3_BRIDGE.get("SANKEY", sankey)
+        use_charts = settings.D3_BRIDGE.get("CHARTS", charts)
+
+    if use_charts:
+        chart_modules, requested = _resolve_chart_modules(use_charts)
+        # The sankey chart type needs the d3-sankey plugin — load it implicitly
+        if "sankey" in (n.lower() for n in requested):
+            use_sankey = True
+    else:
+        chart_modules = CHART_MODULES
 
     from django.templatetags.static import static
 
@@ -70,14 +137,9 @@ def d3_scripts(cdn=True, sankey=False):
     else:
         sankey_script = ""
 
-    # Chart modules
-    chart_types = [
-        "bar", "line", "pie", "scatter", "geo", "network",
-        "chord", "hierarchy", "contour", "voronoi",
-    ]
     chart_scripts = "\n".join(
         f'<script src="{static(f"d3_bridge/js/charts/{ct}.js")}"></script>'
-        for ct in chart_types
+        for ct in chart_modules
     )
 
     # Poll module (always included — no external dependency)
@@ -117,10 +179,15 @@ def d3_render(chart, **kwargs):
 
     # Apply per-render overrides on the config copy, not on the instance
     if "theme" in kwargs or "palette" in kwargs:
-        config["theme"] = resolve_theme(
+        theme_resolved, theme_dark = resolve_theme_pair(
             kwargs.get("theme", chart.theme),
             palette_override=kwargs.get("palette", chart.palette),
         )
+        config["theme"] = theme_resolved
+        if theme_dark is not None:
+            config["themeDark"] = theme_dark
+        else:
+            config.pop("themeDark", None)
     if "height" in kwargs:
         config["height"] = int(kwargs["height"])
     if "width" in kwargs:

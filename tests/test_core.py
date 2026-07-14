@@ -406,3 +406,31 @@ class TestSerializers:
         from d3_bridge.data.serializers import serialize_data
         with pytest.raises(ValueError, match="Unsupported"):
             serialize_data(42)
+
+
+# ── Auto theme (prefers-color-scheme) ───────────────────────
+
+class TestAutoTheme:
+    def test_auto_resolves_both_themes(self):
+        config = Chart(theme="auto").to_config()
+        assert config["theme"] == resolve_theme("default")
+        assert config["themeDark"] == resolve_theme("dark")
+
+    def test_non_auto_has_no_theme_dark(self):
+        config = Chart(theme="dark").to_config()
+        assert "themeDark" not in config
+
+    def test_auto_respects_palette_override(self):
+        config = Chart(theme="auto", palette=["#111", "#222"]).to_config()
+        assert config["theme"]["palette"] == ["#111", "#222"]
+        assert config["themeDark"]["palette"] == ["#111", "#222"]
+
+    def test_auto_pair_configurable_via_settings(self, settings):
+        settings.D3_BRIDGE = {"AUTO_THEMES": ("bootstrap", "terraf")}
+        config = Chart(theme="auto").to_config()
+        assert config["theme"] == resolve_theme("bootstrap")
+        assert config["themeDark"] == resolve_theme("terraf")
+
+    def test_auto_serializes_to_json(self):
+        parsed = json.loads(Chart(theme="auto").to_json())
+        assert parsed["themeDark"]["background"] == resolve_theme("dark")["background"]

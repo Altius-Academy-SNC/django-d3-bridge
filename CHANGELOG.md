@@ -5,6 +5,28 @@ All notable changes to django-d3-bridge are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2026-07-14
+
+### Added
+
+- **Selective chart module loading**: `{% d3_scripts charts="bar,area" %}`
+  loads only the JS modules needed instead of all 10. Accepts chart type
+  names (each resolves to the module that renders it: `area` → `line.js`,
+  `sunburst` → `hierarchy.js`, …); requesting `sankey` loads the d3-sankey
+  plugin automatically; unknown names raise an error. Also configurable
+  globally via `D3_BRIDGE = {"CHARTS": [...]}`. Default unchanged (all modules).
+- **Auto theme**: `theme="auto"` (on a chart or as a `{% d3_render %}`
+  override) follows the browser's `prefers-color-scheme` — light mode renders
+  the `default` theme, dark mode the `dark` theme, and charts re-render live
+  when the OS/browser switches mode. The pair is configurable via
+  `D3_BRIDGE = {"AUTO_THEMES": ("light", "dark")}`. New
+  `d3_bridge.themes.resolve_theme_pair()` helper.
+
+### Fixed
+
+- Switching from a dark to a light theme now clears the container's
+  background color instead of keeping the dark one.
+
 ## [0.1.4] - 2026-07-14
 
 ### Security

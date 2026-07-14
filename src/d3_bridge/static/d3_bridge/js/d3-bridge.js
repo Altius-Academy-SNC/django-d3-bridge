@@ -14,6 +14,8 @@ var D3Bridge = (function () {
   var _renderers = {};
   var _charts = {};
   var _observers = {};
+  var _configs = {};
+  var _schemeQuery = null;
 
   // ── Utilities ──────────────────────────────────────────────
 
@@ -37,10 +39,14 @@ var D3Bridge = (function () {
     var innerWidth = width - margin.left - margin.right;
     var innerHeight = height - margin.top - margin.bottom;
 
-    // Apply background
-    if (theme.background && theme.background !== "transparent") {
-      container.style("background-color", theme.background);
-    }
+    // Apply background (reset when the theme has none, so an auto-theme
+    // switch from dark back to light doesn't keep the dark background)
+    container.style(
+      "background-color",
+      theme.background && theme.background !== "transparent"
+        ? theme.background
+        : null
+    );
 
     var ariaLabel =
       config.title || (config.type ? config.type + " chart" : "chart");
@@ -422,6 +428,40 @@ var D3Bridge = (function () {
     _observers[containerId] = observer;
   }
 
+  /**
+   * theme="auto" support: charts shipping a `themeDark` follow the browser's
+   * prefers-color-scheme. Returns the config to render right now (the dark
+   * variant when the browser is in dark mode), and lazily installs a single
+   * media-query listener that re-renders every auto-themed chart on switch.
+   */
+  function applyColorScheme(config) {
+    if (
+      !config.themeDark ||
+      typeof window === "undefined" ||
+      !window.matchMedia
+    ) {
+      return config;
+    }
+    if (!_schemeQuery) {
+      _schemeQuery = window.matchMedia("(prefers-color-scheme: dark)");
+      var onChange = function () {
+        Object.keys(_configs).forEach(function (id) {
+          if (_configs[id] && _configs[id].themeDark) {
+            render(id, _configs[id]);
+          }
+        });
+      };
+      if (_schemeQuery.addEventListener) {
+        _schemeQuery.addEventListener("change", onChange);
+      } else if (_schemeQuery.addListener) {
+        _schemeQuery.addListener(onChange);
+      }
+    }
+    if (!_schemeQuery.matches) return config;
+    var dark = Object.assign({}, config, { theme: config.themeDark });
+    return dark;
+  }
+
   // ── Public API ─────────────────────────────────────────────
 
   function register(type, renderFn) {
@@ -435,6 +475,10 @@ var D3Bridge = (function () {
       console.error("[D3Bridge] Unknown chart type: " + type);
       return null;
     }
+
+    // Keep the original config so a color-scheme switch can re-render
+    _configs[containerId] = config;
+    config = applyColorScheme(config);
 
     var instance = renderFn(containerId, config);
     _charts[containerId] = instance;
@@ -486,6 +530,7 @@ var D3Bridge = (function () {
     var instance = _charts[containerId];
     if (instance && instance.destroy) instance.destroy();
     delete _charts[containerId];
+    delete _configs[containerId];
     d3.select("#" + containerId).selectAll("*").remove();
     d3.select("#" + containerId + "-tooltip").remove();
   }

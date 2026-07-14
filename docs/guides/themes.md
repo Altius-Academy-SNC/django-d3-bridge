@@ -10,6 +10,7 @@ django-d3-bridge includes a theme system that controls colors, typography, and s
 | `dark` | Dark background, cool palette |
 | `bootstrap` | Matches Bootstrap 5 colors |
 | `terraf` | Earth tones, DM Sans font |
+| `auto` | Follows the browser's `prefers-color-scheme` (see below) |
 
 ```python
 chart = BarChart(data=data, x="x", y="y", theme="dark")
@@ -20,6 +21,31 @@ Or override in the template:
 ```html
 {% d3_render chart theme="bootstrap" %}
 ```
+
+## Auto Theme (light/dark)
+
+With `theme="auto"`, the chart follows the browser's `prefers-color-scheme`:
+light mode renders the `default` theme, dark mode the `dark` theme — and the
+chart re-renders live when the OS or browser switches mode.
+
+```python
+chart = BarChart(data=data, x="x", y="y", theme="auto")
+```
+
+```html
+{% d3_render chart theme="auto" %}
+```
+
+The light/dark pair is configurable globally:
+
+```python
+# settings.py
+D3_BRIDGE = {
+    "AUTO_THEMES": ("bootstrap", "dark"),  # (light, dark) — default: ("default", "dark")
+}
+```
+
+Custom themes registered with `register_theme()` can be used in the pair.
 
 ## Built-in Palettes
 

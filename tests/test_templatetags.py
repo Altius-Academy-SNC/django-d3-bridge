@@ -115,3 +115,82 @@ class TestD3Scripts:
         html = str(d3_scripts(sankey=True))
         assert "d3-sankey" in html
         assert "integrity=" in html
+
+
+# ── charts= selective module loading ────────────────────────
+
+class TestChartsSelection:
+    def test_default_loads_all_modules(self):
+        html = str(d3_scripts())
+        for module in ["bar", "line", "pie", "scatter", "geo", "network",
+                       "chord", "hierarchy", "contour", "voronoi"]:
+            assert f"charts/{module}.js" in html
+
+    def test_charts_param_limits_modules(self):
+        html = str(d3_scripts(charts="bar,line"))
+        assert "charts/bar.js" in html
+        assert "charts/line.js" in html
+        assert "charts/pie.js" not in html
+        assert "charts/hierarchy.js" not in html
+
+    def test_chart_type_resolves_to_module(self):
+        # area is rendered by line.js, sunburst by hierarchy.js
+        html = str(d3_scripts(charts="area,sunburst"))
+        assert "charts/line.js" in html
+        assert "charts/hierarchy.js" in html
+        assert "charts/bar.js" not in html
+
+    def test_donut_resolves_to_pie(self):
+        html = str(d3_scripts(charts="donut"))
+        assert "charts/pie.js" in html
+
+    def test_sankey_autoloads_plugin(self):
+        html = str(d3_scripts(charts="sankey"))
+        assert "charts/network.js" in html
+        assert "d3-sankey" in html
+
+    def test_charts_accepts_list(self):
+        html = str(d3_scripts(charts=["bar", "pie"]))
+        assert "charts/bar.js" in html
+        assert "charts/pie.js" in html
+        assert "charts/geo.js" not in html
+
+    def test_unknown_chart_raises(self):
+        with pytest.raises(ValueError, match="unknown chart type"):
+            d3_scripts(charts="bar,nonexistent")
+
+    def test_charts_settings_override(self, settings):
+        settings.D3_BRIDGE = {"CHARTS": ["bar"]}
+        html = str(d3_scripts())
+        assert "charts/bar.js" in html
+        assert "charts/line.js" not in html
+
+    def test_runtime_always_loaded(self):
+        html = str(d3_scripts(charts="bar"))
+        assert "d3-bridge.js" in html
+        assert "poll.js" in html
+
+
+# ── theme="auto" via d3_render ──────────────────────────────
+
+class TestAutoThemeRender:
+    def _config(self, html):
+        return json.loads(
+            html[html.index("var config = ") + len("var config = "):html.index(";\n")]
+        )
+
+    def test_render_override_theme_auto(self):
+        chart = BarChart(data=[{"x": "a", "y": 1}], x="x", y="y")
+        config = self._config(str(d3_render(chart, theme="auto")))
+        assert "themeDark" in config
+        assert config["themeDark"]["background"] != config["theme"]["background"]
+
+    def test_render_override_back_to_fixed_theme(self):
+        chart = BarChart(data=[{"x": "a", "y": 1}], x="x", y="y", theme="auto")
+        config = self._config(str(d3_render(chart, theme="dark")))
+        assert "themeDark" not in config
+
+    def test_auto_chart_renders_theme_dark(self):
+        chart = BarChart(data=[{"x": "a", "y": 1}], x="x", y="y", theme="auto")
+        config = self._config(str(d3_render(chart)))
+        assert "themeDark" in config

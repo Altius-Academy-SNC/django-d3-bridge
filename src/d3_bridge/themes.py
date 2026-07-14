@@ -123,6 +123,27 @@ def resolve_theme(name: str = "default", palette_override: str | list | None = N
     return theme
 
 
+def resolve_theme_pair(
+    name: str = "default", palette_override: str | list | None = None
+) -> tuple[dict, dict | None]:
+    """Resolve a theme name to ``(theme, dark_theme_or_None)``.
+
+    ``"auto"`` resolves both halves of the light/dark pair (``default``/``dark``
+    unless overridden via ``D3_BRIDGE = {"AUTO_THEMES": ("light", "dark")}``);
+    the JS runtime then follows the browser's ``prefers-color-scheme``.
+    Any other name resolves to ``(theme, None)``.
+    """
+    if name == "auto":
+        from django.conf import settings
+
+        light, dark = getattr(settings, "D3_BRIDGE", {}).get("AUTO_THEMES", ("default", "dark"))
+        return (
+            resolve_theme(light, palette_override),
+            resolve_theme(dark, palette_override),
+        )
+    return resolve_theme(name, palette_override), None
+
+
 def register_theme(name: str, config: dict) -> None:
     """Register a custom theme."""
     THEMES[name] = config

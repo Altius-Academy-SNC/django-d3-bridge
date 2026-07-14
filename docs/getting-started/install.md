@@ -43,9 +43,11 @@ That's the minimum. No database migrations, no middleware, no extra config.
 ```python
 # settings.py
 D3_BRIDGE = {
-    "CDN": True,       # Load D3.js from CDN (default: True)
-    "MQTT": False,     # Include MQTT.js globally (default: False)
-    "SANKEY": False,   # Include the d3-sankey plugin globally (default: False)
+    "CDN": True,                            # Load D3.js from CDN (default: True)
+    "MQTT": False,                          # Include MQTT.js globally (default: False)
+    "SANKEY": False,                        # Include the d3-sankey plugin globally (default: False)
+    "CHARTS": None,                         # Restrict loaded chart modules (default: all)
+    "AUTO_THEMES": ("default", "dark"),     # (light, dark) pair for theme="auto"
 }
 ```
 
@@ -54,6 +56,8 @@ D3_BRIDGE = {
 | `CDN` | `True` | If `True`, loads D3.js from jsDelivr CDN. Set `False` to serve the copies vendored in the package (D3 v7, and d3-sankey / mqtt.js when enabled) from your static files — fully offline, no external requests. |
 | `MQTT` | `False` | If `True`, includes the MQTT.js client globally via `{% d3_scripts %}`. Only needed if you use `live=True` on charts. |
 | `SANKEY` | `False` | If `True`, includes the [d3-sankey](https://github.com/d3/d3-sankey) plugin globally via `{% d3_scripts %}`. Only needed if you use the [Sankey](../charts/sankey.md) chart type — it can also be enabled per-page with `{% d3_scripts sankey=True %}` instead. |
+| `CHARTS` | `None` | Restrict which chart modules `{% d3_scripts %}` loads (list of chart types, e.g. `["bar", "line"]`). `None` loads all. Can also be set per-page with `{% d3_scripts charts="bar,line" %}`. |
+| `AUTO_THEMES` | `("default", "dark")` | The (light, dark) theme pair used by `theme="auto"`, which follows the browser's `prefers-color-scheme`. |
 
 ## Verify Installation
 

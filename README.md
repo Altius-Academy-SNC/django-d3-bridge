@@ -79,6 +79,8 @@ chart = LineChart(
 - Pure D3.js v7 output — inspectable, no abstraction layer
 - Django QuerySet + GeoQuerySet + DataFrame serialization
 - 4 themes (default, dark, bootstrap, terraf) + 7 color palettes
+- `theme="auto"` follows the browser's `prefers-color-scheme`, live
+- Load only the chart modules you use: `{% d3_scripts charts="bar,line" %}`
 - Responsive, animated, with tooltips — SVGs carry `role="img"` + `aria-label`
 - XSS-safe rendering: chart configs are escaped like Django's `json_script`
 - Works fully offline: D3, d3-sankey and mqtt.js vendored (`{% d3_scripts cdn=False %}`)
