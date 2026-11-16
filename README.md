@@ -58,6 +58,22 @@ def dashboard(request):
 | **Hierarchy** | Tree, Treemap, Circle Packing, Sunburst, Dendrogram |
 | **Statistical** | Contour Plot, Density Plot, Voronoi Diagram |
 
+## Positioning Matrices
+
+A scatter can be a matrix with fixed axes, named zones and a path through the
+points — trust × relevance, likelihood × impact, effort × value:
+
+```python
+chart = ScatterPlot(
+    data=points, x="x", y="y",
+    x_domain=(0, 10), y_domain=(0, 10),
+    regions=[{"x0": 0, "x1": 5, "y0": 6, "y1": 10, "label": "Unease", "color": "#e15759"}],
+    connect="on_path", label="number", color_field="colour", shape_field="shape",
+)
+```
+
+See the [Positioning Matrix guide](https://altius-academy-snc.github.io/django-d3-bridge/guides/positioning-matrix/).
+
 ## 3 Data Modes
 
 - **Static** — QuerySet evaluated at each page load
@@ -97,4 +113,4 @@ See [CHANGELOG.md](CHANGELOG.md) for release notes.
 
 ## License
 
-MIT — [Paul Guindo](https://github.com/Altius-Academy-SNC) / Altius Academy SNC
+MIT — Paul Guindo / Altius Group

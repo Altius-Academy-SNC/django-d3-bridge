@@ -73,6 +73,30 @@ chart = ScatterPlot(data=data, x="x", y="y", zoom=True)
 | `regression` | str | `None` | `"linear"` or `None` |
 | `x_label` | str | `None` | X-axis label |
 | `y_label` | str | `None` | Y-axis label |
+| `shape` | str | `"circle"` | Shape of every point: `circle`, `square`, `cross`, `x`, `diamond`, `triangle`, `star`, `wye` |
+| `x_domain` | tuple | `None` | Fixed x-axis bounds `(min, max)` instead of the data extent |
+| `y_domain` | tuple | `None` | Fixed y-axis bounds `(min, max)` instead of the data extent |
+| `regions` | list of dict | `[]` | Labelled background rectangles (see below) |
+| `connect` | bool or str | `False` | Line through the points in data order; a field name joins only the points where it is truthy |
+| `label` | str | `None` | Field written on each point (inside a point of radius ≥ 8, beside a smaller one) |
+| `color_field` | str | `None` | Field holding a literal CSS colour per point; wins over `color_by` |
+| `shape_field` | str | `None` | Field holding a shape name per point; wins over `shape` |
+| `field_labels` | dict | `None` | Display names of fields in the tooltip |
+| `tooltip` | bool or list | `True` | A list of field names shows those fields on hover |
+
+All new options are optional: a scatter without them renders exactly as in 0.2.
+
+### Region keys
+
+| Key | Required | Description |
+|-----|----------|-------------|
+| `x0`, `x1`, `y0`, `y1` | yes | Bounds in data units (order does not matter) |
+| `label` | no | Text in the top-left corner of the rectangle |
+| `color` | no | Fill and label colour; any CSS colour, CSS variables included |
+| `opacity` | no | Fill opacity, `0.12` by default |
+
+A region missing one of its four bounds raises `ValueError`; unknown keys are
+dropped. Regions are drawn behind the grid and the points, and follow the zoom.
 
 ## Positioning Matrix
 
@@ -108,3 +132,6 @@ chart = ScatterPlot(
 ```
 
 Tooltip values are HTML-escaped.
+
+See the [Positioning Matrix guide](../guides/positioning-matrix.md) for a
+complete example built from Django models.
