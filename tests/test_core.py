@@ -208,6 +208,51 @@ class TestScatterPlot:
         config = chart.to_config()
         assert config["regression"] == "linear"
 
+    def test_defaults_add_no_matrix_keys(self):
+        config = ScatterPlot(x="a", y="b").to_config()
+        for key in ("xDomain", "yDomain", "regions", "connect", "label",
+                    "colorField", "shapeField", "fieldLabels"):
+            assert key not in config
+
+    def test_fixed_domains(self):
+        config = ScatterPlot(x="a", y="b", x_domain=(0, 10), y_domain=(0, 10)).to_config()
+        assert config["xDomain"] == [0, 10]
+        assert config["yDomain"] == [0, 10]
+
+    def test_domain_must_grow(self):
+        with pytest.raises(ValueError):
+            ScatterPlot(x_domain=(10, 0))
+
+    def test_regions_keep_only_known_keys(self):
+        config = ScatterPlot(regions=[
+            {"x0": 0, "x1": 5, "y0": 6, "y1": 10, "label": "Unease", "color": "#e15759",
+             "secret": "dropped"},
+        ]).to_config()
+        assert config["regions"] == [
+            {"x0": 0, "x1": 5, "y0": 6, "y1": 10, "label": "Unease", "color": "#e15759"},
+        ]
+
+    def test_region_needs_its_four_bounds(self):
+        with pytest.raises(ValueError):
+            ScatterPlot(regions=[{"x0": 0, "x1": 5, "y0": 0}])
+
+    def test_trajectory_label_colour_and_shape_fields(self):
+        config = ScatterPlot(
+            x="x", y="y", connect="on_path", label="number",
+            color_field="colour", shape_field="shape",
+            field_labels={"text": "Question"}, tooltip=["text"],
+        ).to_config()
+        assert config["connect"] == "on_path"
+        assert config["label"] == "number"
+        assert config["colorField"] == "colour"
+        assert config["shapeField"] == "shape"
+        assert config["fieldLabels"] == {"text": "Question"}
+        assert config["tooltip"] == ["text"]
+
+    def test_unknown_shape_is_refused(self):
+        with pytest.raises(ValueError):
+            ScatterPlot(shape="hexagon")
+
 
 # ── Force Graph ─────────────────────────────────────────────
 
