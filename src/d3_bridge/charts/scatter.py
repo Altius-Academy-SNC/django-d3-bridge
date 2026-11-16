@@ -51,7 +51,7 @@ class ScatterPlot(Chart):
 
     chart_type = "scatter"
 
-    def __init__(self, data=None, x: str = None, y: str = None, **kw):
+    def __init__(self, data=None, x: str | None = None, y: str | None = None, **kw):
         self.x = x
         self.y = y
         self.x_label: str | None = kw.pop("x_label", None)

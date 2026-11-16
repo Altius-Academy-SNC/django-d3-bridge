@@ -8,7 +8,7 @@ from d3_bridge.core import Chart
 class PieChart(Chart):
     chart_type = "pie"
 
-    def __init__(self, data=None, value: str = None, label: str = None, **kw):
+    def __init__(self, data=None, value: str | None = None, label: str | None = None, **kw):
         self.value = value
         self.label = label
         self.inner_radius: float = kw.pop("inner_radius", 0)
@@ -33,6 +33,6 @@ class PieChart(Chart):
 class DonutChart(PieChart):
     chart_type = "pie"
 
-    def __init__(self, data=None, value: str = None, label: str = None, **kw):
+    def __init__(self, data=None, value: str | None = None, label: str | None = None, **kw):
         kw.setdefault("inner_radius", 0.6)
         super().__init__(data=data, value=value, label=label, **kw)

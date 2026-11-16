@@ -8,7 +8,7 @@ from d3_bridge.core import Chart
 class VoronoiDiagram(Chart):
     chart_type = "voronoi"
 
-    def __init__(self, data=None, x: str = None, y: str = None, **kw):
+    def __init__(self, data=None, x: str | None = None, y: str | None = None, **kw):
         self.x = x
         self.y = y
         self.x_label: str | None = kw.pop("x_label", None)
