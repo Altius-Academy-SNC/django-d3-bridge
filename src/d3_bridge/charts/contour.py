@@ -8,7 +8,7 @@ from d3_bridge.core import Chart
 class ContourPlot(Chart):
     chart_type = "contour"
 
-    def __init__(self, data=None, x: str = None, y: str = None, value: str = None, **kw):
+    def __init__(self, data=None, x: str | None = None, y: str | None = None, value: str | None = None, **kw):
         self.x = x
         self.y = y
         self.value = value
@@ -38,7 +38,7 @@ class ContourPlot(Chart):
 class DensityPlot(Chart):
     chart_type = "density"
 
-    def __init__(self, data=None, x: str = None, y: str = None, **kw):
+    def __init__(self, data=None, x: str | None = None, y: str | None = None, **kw):
         self.x = x
         self.y = y
         self.x_label: str | None = kw.pop("x_label", None)

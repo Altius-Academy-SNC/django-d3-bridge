@@ -9,7 +9,7 @@ from d3_bridge.data.serializers import serialize_geojson
 class ChoroplethMap(Chart):
     chart_type = "choropleth"
 
-    def __init__(self, geodata=None, value_field: str = None, **kw):
+    def __init__(self, geodata=None, value_field: str | None = None, **kw):
         self.value_field = value_field
         self.geometry_field: str | None = kw.pop("geometry_field", None)
         self.properties: list[str] | None = kw.pop("properties", None)
@@ -65,7 +65,7 @@ class ChoroplethMap(Chart):
 class BubbleMap(ChoroplethMap):
     chart_type = "bubblemap"
 
-    def __init__(self, geodata=None, value_field: str = None, **kw):
+    def __init__(self, geodata=None, value_field: str | None = None, **kw):
         self.size_field: str | None = kw.pop("size_field", None)
         self.size_range: list[float] = kw.pop("size_range", [3, 30])
         super().__init__(geodata=geodata, value_field=value_field, **kw)

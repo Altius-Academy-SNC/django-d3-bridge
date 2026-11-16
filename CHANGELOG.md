@@ -23,6 +23,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Scatter tooltips escape field values: text coming from the database can no
   longer inject HTML.
+- The GIS probe catches only the errors a missing GIS stack raises
+  (`ImportError`, `ImproperlyConfigured`, `OSError`) instead of any exception.
+- Lint passes with current ruff: explicit `Optional` type hints, sorted imports.
 
 ## [0.2.0] - 2026-07-14
 
