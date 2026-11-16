@@ -8,7 +8,7 @@ from d3_bridge.core import Chart
 class LineChart(Chart):
     chart_type = "line"
 
-    def __init__(self, data=None, x: str = None, y: str = None, **kw):
+    def __init__(self, data=None, x: str | None = None, y: str | None = None, **kw):
         self.x = x
         self.y = y
         self.x_label: str | None = kw.pop("x_label", None)
@@ -54,7 +54,7 @@ class LineChart(Chart):
 class AreaChart(LineChart):
     chart_type = "area"
 
-    def __init__(self, data=None, x: str = None, y: str = None, **kw):
+    def __init__(self, data=None, x: str | None = None, y: str | None = None, **kw):
         kw.setdefault("fill", True)
         kw.setdefault("fill_opacity", 0.4)
         kw.setdefault("dots", False)

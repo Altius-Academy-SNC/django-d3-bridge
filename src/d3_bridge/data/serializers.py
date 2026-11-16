@@ -10,9 +10,11 @@ from typing import Any
 
 def _is_geo_queryset(data) -> bool:
     """Check if data is a GeoQuerySet or contains geometry fields."""
+    from django.core.exceptions import ImproperlyConfigured
+
     try:
         from django.contrib.gis.db.models import GeometryField
-    except Exception:
+    except (ImportError, ImproperlyConfigured, OSError):
         # ImportError without django.contrib.gis, but Django raises
         # ImproperlyConfigured when GDAL itself is missing — either way,
         # no GIS support means no geo queryset.
