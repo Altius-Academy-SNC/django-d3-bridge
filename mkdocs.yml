@@ -66,6 +66,7 @@ nav:
   - Guides:
       - Django Integration: guides/django.md
       - Themes & Palettes: guides/themes.md
+      - Positioning Matrix: guides/positioning-matrix.md
       - Polling (Auto-refresh): guides/polling.md
       - MQTT Live Updates: guides/mqtt.md
       - GeoDjango & GeoJSON: guides/geodjango.md
