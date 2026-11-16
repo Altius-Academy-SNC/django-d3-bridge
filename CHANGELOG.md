@@ -5,6 +5,25 @@ All notable changes to django-d3-bridge are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2026-11-16
+
+### Added
+
+- **Scatter as a positioning matrix**: `ScatterPlot` gains `x_domain` /
+  `y_domain` (fixed axis bounds instead of the data extent), `regions`
+  (labelled background rectangles), `connect` (a line through the points in
+  data order, optionally only those where a field is truthy), `label` (text
+  on each point), `color_field` (literal CSS colour per point, CSS variables
+  included), `shape_field` (shape per point) and `field_labels` (tooltip
+  display names). `tooltip` may be a list of fields for scatter plots too.
+- Scatter `shape` is now honoured: `square`, `cross`, `x`, `diamond`,
+  `triangle`, `star` and `wye` render as symbols; unknown shapes raise.
+
+### Fixed
+
+- Scatter tooltips escape field values: text coming from the database can no
+  longer inject HTML.
+
 ## [0.2.0] - 2026-07-14
 
 ### Added
